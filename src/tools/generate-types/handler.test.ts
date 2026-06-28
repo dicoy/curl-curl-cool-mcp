@@ -55,6 +55,25 @@ describe("generateTypesHandler", () => {
     expect(result).toContain("interface HealthCheck");
   });
 
+  it("handles a root-level array with a plural name", () => {
+    const result = generateTypesHandler({
+      json: '[{"id": 1, "name": "Alice"}]',
+      root_type_name: "Users",
+    });
+    expect(result).toContain("type Users = User[]");
+    expect(result).toContain("interface User");
+    expect(result).toContain("id: number");
+  });
+
+  it("handles a root-level array when the name does not singularize", () => {
+    const result = generateTypesHandler({
+      json: '[{"id": 1}]',
+      root_type_name: "Data",
+    });
+    expect(result).toContain("type Data = DataItem[]");
+    expect(result).toContain("interface DataItem");
+  });
+
   it("throws InvalidJsonError for invalid JSON", () => {
     expect(() => generateTypesHandler({ json: "not valid json", root_type_name: "T" })).toThrow(
       InvalidJsonError,

@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { ICollectionProvider } from "../providers/collection.js";
 import type { IHistoryProvider } from "../providers/history.js";
 import type { IHttpProvider } from "../providers/http.js";
+import type { IPostmanEnvironmentProvider } from "../providers/postman-environment.js";
 import { diffEnvironmentsHandler } from "../tools/diff-environments/handler.js";
 import { InputSchema as DiffEnvironmentsSchema } from "../tools/diff-environments/schema.js";
 import { generateTypesHandler } from "../tools/generate-types/handler.js";
@@ -12,11 +13,14 @@ import { httpRequestHandler } from "../tools/http-request/handler.js";
 import { InputSchema as HttpRequestSchema } from "../tools/http-request/schema.js";
 import { loadCollectionHandler } from "../tools/load-collection/handler.js";
 import { InputSchema as LoadCollectionSchema } from "../tools/load-collection/schema.js";
+import { loadPostmanEnvironmentHandler } from "../tools/load-postman-environment/handler.js";
+import { InputSchema as LoadPostmanEnvironmentSchema } from "../tools/load-postman-environment/schema.js";
 
 export interface Providers {
   http: IHttpProvider;
   history: IHistoryProvider;
   collection: ICollectionProvider;
+  postmanEnvironment: IPostmanEnvironmentProvider;
 }
 
 export function registerTools(server: McpServer, providers: Providers): void {
@@ -54,10 +58,24 @@ export function registerTools(server: McpServer, providers: Providers): void {
 
   server.tool(
     "load_collection",
-    "Parse an OpenAPI 3.0 spec or custom JSON collection and list all available endpoints.",
+    "Parse an OpenAPI 3.0 spec, Postman Collection v2.1, or custom JSON collection and list all available endpoints.",
     LoadCollectionSchema.shape,
     async (input) => ({
       content: [{ type: "text", text: await loadCollectionHandler(input, providers.collection) }],
+    }),
+  );
+
+  server.tool(
+    "load_postman_environment",
+    "Load a Postman environment file and list its variables. Use the values to substitute {{placeholders}} in collection URLs before calling http_request.",
+    LoadPostmanEnvironmentSchema.shape,
+    async (input) => ({
+      content: [
+        {
+          type: "text",
+          text: await loadPostmanEnvironmentHandler(input, providers.postmanEnvironment),
+        },
+      ],
     }),
   );
 

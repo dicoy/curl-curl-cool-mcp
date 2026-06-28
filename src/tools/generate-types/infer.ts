@@ -9,8 +9,13 @@ export function inferTypes(jsonStr: string, rootName: string): string {
   }
 
   const emitter = new TypeEmitter();
-  emitter.emit(parsed, rootName);
-  return emitter.render();
+  const rootType = emitter.emit(parsed, rootName);
+  const rendered = emitter.render();
+  const capitalizedRoot = capitalize(rootName);
+  if (rootType !== capitalizedRoot) {
+    return `type ${capitalizedRoot} = ${rootType};\n\n${rendered}`;
+  }
+  return rendered;
 }
 
 class TypeEmitter {
@@ -25,7 +30,9 @@ class TypeEmitter {
 
     if (Array.isArray(value)) {
       if (value.length === 0) return "unknown[]";
-      return `${this.emit(value[0], singularize(name))}[]`;
+      const singular = singularize(name);
+      const elementName = singular === name ? `${name}Item` : singular;
+      return `${this.emit(value[0], elementName)}[]`;
     }
 
     if (typeof value === "object") {

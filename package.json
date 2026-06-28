@@ -25,7 +25,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "ci": "npm run typecheck && npm run lint && npm run test && npm run build"
+    "ci": "npm run typecheck && npm run lint && npm run test && npm run build",
+    "demo:http": "tsx demo/http.ts",
+    "demo:diff": "tsx demo/diff.ts",
+    "demo:postman": "tsx demo/postman.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",

@@ -1,4 +1,6 @@
 import type { HttpResponse, IHttpProvider } from "../../providers/http.js";
+import { resolveAuthHeaders } from "../../utils/auth.js";
+import { substituteVariables } from "../../utils/variables.js";
 import type { Input } from "./schema.js";
 
 interface EnvResult {
@@ -17,13 +19,18 @@ export async function diffEnvironmentsHandler(
   }
 
   const results: EnvResult[] = await Promise.all(
-    envEntries.map(async ([name, baseUrl]) => {
-      const url = `${baseUrl.replace(/\/$/, "")}${input.path}`;
+    envEntries.map(async ([name, baseUrlOrVars]) => {
+      const url =
+        typeof baseUrlOrVars === "string"
+          ? `${baseUrlOrVars.replace(/\/$/, "")}${input.path}`
+          : substituteVariables(input.path, baseUrlOrVars);
       try {
+        const authHeaders = resolveAuthHeaders(input.auth);
+        const mergedHeaders = { ...authHeaders, ...(input.headers ?? {}) };
         const response = await httpProvider.request({
           method: input.method,
           url,
-          ...(input.headers !== undefined && { headers: input.headers }),
+          ...(Object.keys(mergedHeaders).length > 0 && { headers: mergedHeaders }),
           ...(input.body !== undefined && { body: input.body }),
           timeoutMs: input.timeout_ms,
         });
@@ -120,9 +127,19 @@ function diffValues(a: unknown, b: unknown, path: string): string[] {
     return [`${label}: type mismatch (array vs object)`];
   }
   if (Array.isArray(a) && Array.isArray(b)) {
-    return a.length !== b.length ? [`${label}[]: length ${a.length} → ${b.length}`] : [];
+    return diffArrayElements(a, b, label);
   }
   return diffObjects(a as Record<string, unknown>, b as Record<string, unknown>, path);
+}
+
+function diffArrayElements(a: unknown[], b: unknown[], label: string): string[] {
+  const diffs: string[] = [];
+  if (a.length !== b.length) diffs.push(`${label}[]: length ${a.length} → ${b.length}`);
+  const limit = Math.min(a.length, b.length, 5);
+  for (let i = 0; i < limit; i++) {
+    diffs.push(...diffValues(a[i], b[i], `${label}[${i}]`));
+  }
+  return diffs;
 }
 
 function diffObjects(

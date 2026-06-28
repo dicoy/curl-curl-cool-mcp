@@ -1,0 +1,77 @@
+{
+  "info": {
+    "name": "JSONPlaceholder API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "https://jsonplaceholder.typicode.com" },
+    { "key": "user_id", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "List users",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/users" },
+            "description": "Returns all users"
+          }
+        },
+        {
+          "name": "Get user by ID",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/users/{{user_id}}" },
+            "description": "Returns a single user"
+          }
+        },
+        {
+          "name": "Create user",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{base_url}}/users" },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{api_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\": \"{{name}}\", \"email\": \"{{email}}\"}"
+            },
+            "description": "Create a new user"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Posts",
+      "item": [
+        {
+          "name": "List posts by user",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/users/{{user_id}}/posts" },
+            "description": "All posts for a user"
+          }
+        },
+        {
+          "name": "Create post",
+          "request": {
+            "method": "POST",
+            "url": { "raw": "{{base_url}}/posts" },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"{{title}}\", \"userId\": {{user_id}}}"
+            },
+            "description": "Create a new post"
+          }
+        }
+      ]
+    }
+  ]
+}

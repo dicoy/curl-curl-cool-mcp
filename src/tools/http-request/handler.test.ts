@@ -88,6 +88,132 @@ describe("httpRequestHandler", () => {
     expect(result).toContain("empty body");
   });
 
+  it("substitutes {{variables}} in the URL before sending", async () => {
+    const provider = makeHttpProvider();
+    await httpRequestHandler(
+      {
+        method: "GET",
+        url: "{{base_url}}/api/{{version}}/users",
+        timeout_ms: 10000,
+        variables: { base_url: "https://api.example.com", version: "v2" },
+      },
+      provider,
+      makeHistoryProvider(),
+    );
+    expect(provider.request).toHaveBeenCalledWith(
+      expect.objectContaining({ url: "https://api.example.com/api/v2/users" }),
+    );
+  });
+
+  it("substitutes {{variables}} in the body before sending", async () => {
+    const provider = makeHttpProvider();
+    await httpRequestHandler(
+      {
+        method: "POST",
+        url: "https://api.example.com/users",
+        timeout_ms: 10000,
+        body: '{"env":"{{env}}"}',
+        variables: { env: "staging" },
+      },
+      provider,
+      makeHistoryProvider(),
+    );
+    expect(provider.request).toHaveBeenCalledWith(
+      expect.objectContaining({ body: '{"env":"staging"}' }),
+    );
+  });
+
+  it("keeps unresolved {{placeholders}} intact when variable is missing", async () => {
+    const provider = makeHttpProvider();
+    await httpRequestHandler(
+      {
+        method: "GET",
+        url: "{{base_url}}/api/users",
+        timeout_ms: 10000,
+        variables: {},
+      },
+      provider,
+      makeHistoryProvider(),
+    );
+    expect(provider.request).toHaveBeenCalledWith(
+      expect.objectContaining({ url: "{{base_url}}/api/users" }),
+    );
+  });
+
+  it("sends a Bearer token in the Authorization header", async () => {
+    const provider = makeHttpProvider();
+    await httpRequestHandler(
+      {
+        method: "GET",
+        url: "https://api.example.com/protected",
+        timeout_ms: 10000,
+        auth: { type: "bearer", token: "my-token" },
+      },
+      provider,
+      makeHistoryProvider(),
+    );
+    expect(provider.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.objectContaining({ Authorization: "Bearer my-token" }),
+      }),
+    );
+  });
+
+  it("sends Basic auth credentials encoded in the Authorization header", async () => {
+    const provider = makeHttpProvider();
+    await httpRequestHandler(
+      {
+        method: "GET",
+        url: "https://api.example.com/protected",
+        timeout_ms: 10000,
+        auth: { type: "basic", username: "user", password: "pass" },
+      },
+      provider,
+      makeHistoryProvider(),
+    );
+    const expected = `Basic ${Buffer.from("user:pass").toString("base64")}`;
+    expect(provider.request).toHaveBeenCalledWith(
+      expect.objectContaining({ headers: expect.objectContaining({ Authorization: expected }) }),
+    );
+  });
+
+  it("sends an API key in the specified header", async () => {
+    const provider = makeHttpProvider();
+    await httpRequestHandler(
+      {
+        method: "GET",
+        url: "https://api.example.com/protected",
+        timeout_ms: 10000,
+        auth: { type: "api-key", header: "X-Auth-Token", value: "abc123" },
+      },
+      provider,
+      makeHistoryProvider(),
+    );
+    expect(provider.request).toHaveBeenCalledWith(
+      expect.objectContaining({ headers: expect.objectContaining({ "X-Auth-Token": "abc123" }) }),
+    );
+  });
+
+  it("explicit headers take precedence over auth headers", async () => {
+    const provider = makeHttpProvider();
+    await httpRequestHandler(
+      {
+        method: "GET",
+        url: "https://api.example.com/protected",
+        timeout_ms: 10000,
+        auth: { type: "bearer", token: "auto-token" },
+        headers: { Authorization: "Bearer override" },
+      },
+      provider,
+      makeHistoryProvider(),
+    );
+    expect(provider.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: expect.objectContaining({ Authorization: "Bearer override" }),
+      }),
+    );
+  });
+
   it("propagates HttpRequestError from the provider", async () => {
     await expect(
       httpRequestHandler(

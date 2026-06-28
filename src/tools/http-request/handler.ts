@@ -1,5 +1,7 @@
 import type { IHistoryProvider } from "../../providers/history.js";
 import type { HttpResponse, IHttpProvider } from "../../providers/http.js";
+import { resolveAuthHeaders } from "../../utils/auth.js";
+import { substituteVariables } from "../../utils/variables.js";
 import type { Input } from "./schema.js";
 
 const SHOWN_HEADERS = new Set([
@@ -18,24 +20,33 @@ export async function httpRequestHandler(
   httpProvider: IHttpProvider,
   historyProvider: IHistoryProvider,
 ): Promise<string> {
+  const vars = input.variables;
+  const url = vars !== undefined ? substituteVariables(input.url, vars) : input.url;
+  const body =
+    vars !== undefined && input.body !== undefined
+      ? substituteVariables(input.body, vars)
+      : input.body;
+
+  const authHeaders = resolveAuthHeaders(input.auth);
+  const mergedHeaders = { ...authHeaders, ...(input.headers ?? {}) };
   const response = await httpProvider.request({
     method: input.method,
-    url: input.url,
-    ...(input.headers !== undefined && { headers: input.headers }),
-    ...(input.body !== undefined && { body: input.body }),
+    url,
+    ...(Object.keys(mergedHeaders).length > 0 && { headers: mergedHeaders }),
+    ...(body !== undefined && { body }),
     timeoutMs: input.timeout_ms,
   });
 
   historyProvider.push({
     timestamp: new Date().toISOString(),
     method: input.method,
-    url: input.url,
+    url,
     status: response.status,
     durationMs: response.durationMs,
     responseBody: response.body.slice(0, 500),
   });
 
-  return formatResponse(input.method, input.url, response);
+  return formatResponse(input.method, url, response);
 }
 
 function formatResponse(method: string, url: string, res: HttpResponse): string {

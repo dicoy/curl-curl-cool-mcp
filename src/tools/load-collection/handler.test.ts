@@ -63,6 +63,34 @@ describe("loadCollectionHandler", () => {
     expect(result).toContain("/users/1");
   });
 
+  it("shows Postman format label and variable-style paths", async () => {
+    const provider = makeProvider({
+      load: vi.fn().mockResolvedValue({
+        name: "My API",
+        format: "postman",
+        variables: { base_url: "https://api.example.com" },
+        requests: [
+          { name: "listUsers", method: "GET", path: "{{base_url}}/users" },
+          {
+            name: "createUser",
+            method: "POST",
+            path: "{{base_url}}/users",
+            headers: { "Content-Type": "application/json" },
+            body: '{"name":"Alice"}',
+          },
+        ],
+      }),
+    });
+
+    const result = await loadCollectionHandler({ path: "my-api.json" }, provider);
+
+    expect(result).toContain("Postman");
+    expect(result).toContain("{{base_url}}");
+    expect(result).toContain("Collection variables:");
+    expect(result).toContain("+headers");
+    expect(result).toContain("+body");
+  });
+
   it("propagates CollectionNotFoundError from the provider", async () => {
     const provider = makeProvider({
       load: vi.fn().mockRejectedValue(new CollectionNotFoundError("missing.yaml")),
