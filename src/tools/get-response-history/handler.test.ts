@@ -9,14 +9,12 @@ const makeEntry = (overrides: Partial<HistoryEntry> = {}): HistoryEntry => ({
   url: "https://api.example.com/users/1",
   status: 200,
   durationMs: 45,
-  responseBody: '{"id":1}',
   ...overrides,
 });
 
 const makeProvider = (entries: HistoryEntry[]): IHistoryProvider => ({
   push: vi.fn(),
   list: vi.fn().mockReturnValue(entries),
-  clear: vi.fn(),
 });
 
 describe("getResponseHistoryHandler", () => {

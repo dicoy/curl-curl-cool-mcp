@@ -1,5 +1,7 @@
 # curl-curl-cool-mcp
 
+[![CI](https://github.com/dicoy/curl-curl-cool-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/dicoy/curl-curl-cool-mcp/actions/workflows/ci.yml)
+
 An MCP server that gives Claude a full HTTP client — make requests, compare environments, infer TypeScript types from live responses, and work directly with your existing Postman collections and environments.
 
 Built with the [Model Context Protocol](https://modelcontextprotocol.io/) TypeScript SDK, native `fetch` (no Axios), and a provider pattern that keeps every tool unit-testable without network calls.

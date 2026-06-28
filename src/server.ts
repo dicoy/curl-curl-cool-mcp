@@ -14,7 +14,7 @@ export function createServer(): McpServer {
   };
 
   const server = new McpServer({
-    name: "mcp-httpclient",
+    name: "curl-curl-cool-mcp",
     version: "0.1.0",
   });
 

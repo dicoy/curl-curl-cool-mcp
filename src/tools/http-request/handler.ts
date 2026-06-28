@@ -43,7 +43,6 @@ export async function httpRequestHandler(
     url,
     status: response.status,
     durationMs: response.durationMs,
-    responseBody: response.body.slice(0, 500),
   });
 
   return formatResponse(input.method, url, response);

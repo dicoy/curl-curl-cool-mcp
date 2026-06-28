@@ -49,7 +49,7 @@ export function registerTools(server: McpServer, providers: Providers): void {
 
   server.tool(
     "generate_types",
-    "Infer TypeScript interface declarations from a JSON string. Nest objects become named interfaces. Chain with http_request to generate types from a live API response.",
+    "Infer TypeScript interface declarations from a JSON string. Nested objects become named interfaces. For arrays, types are inferred from the first element. Chain with http_request to generate types from a live API response.",
     GenerateTypesSchema.shape,
     (input) => ({
       content: [{ type: "text", text: generateTypesHandler(input) }],

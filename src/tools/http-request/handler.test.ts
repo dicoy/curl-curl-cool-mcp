@@ -22,7 +22,6 @@ const makeHttpProvider = (overrides: Partial<IHttpProvider> = {}): IHttpProvider
 const makeHistoryProvider = (overrides: Partial<IHistoryProvider> = {}): IHistoryProvider => ({
   push: vi.fn(),
   list: vi.fn().mockReturnValue([]),
-  clear: vi.fn(),
   ...overrides,
 });
 

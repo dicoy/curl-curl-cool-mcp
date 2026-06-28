@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 export PATH="$HOME/.nvm/versions/node/v20.20.0/bin:$PATH"
-npm --prefix /Users/seba/gits/mcp-it-works-in-local/mcp-httpclient run demo:postman
+PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+npm --prefix "$PROJECT_ROOT" run demo:postman
