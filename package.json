@@ -1,15 +1,30 @@
 {
-  "name": "mcp-httpclient",
+  "name": "curl-curl-cool-mcp",
   "version": "0.1.0",
   "description": "MCP server that lets AI assistants make HTTP requests, diff environments, and generate TypeScript types from live API responses",
   "type": "module",
   "license": "MIT",
+  "author": "dicoy",
+  "homepage": "https://github.com/dicoy/curl-curl-cool-mcp#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dicoy/curl-curl-cool-mcp.git"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "http",
+    "api",
+    "claude",
+    "postman",
+    "ai"
+  ],
   "engines": {
     "node": ">=20.0.0"
   },
   "main": "dist/index.js",
   "bin": {
-    "mcp-httpclient": "dist/index.js"
+    "curl-curl-cool-mcp": "dist/index.js"
   },
   "files": [
     "dist"

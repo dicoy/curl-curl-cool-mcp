@@ -1,4 +1,4 @@
-# mcp-httpclient
+# curl-curl-cool-mcp
 
 An MCP server that gives Claude a full HTTP client — make requests, compare environments, infer TypeScript types from live responses, and work directly with your existing Postman collections and environments.
 
@@ -21,6 +21,48 @@ Built with the [Model Context Protocol](https://modelcontextprotocol.io/) TypeSc
 
 ---
 
+## Installation
+
+### Via npm (recommended)
+
+```bash
+npm install -g curl-curl-cool-mcp
+```
+
+Or use it without installing — `npx` will fetch and run it on demand (see Claude config below).
+
+### From source
+
+```bash
+git clone https://github.com/dicoy/curl-curl-cool-mcp.git
+cd curl-curl-cool-mcp
+npm install
+npm run build
+```
+
+### Add to Claude Desktop
+
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json` on macOS:
+
+```json
+{
+  "mcpServers": {
+    "httpclient": {
+      "command": "npx",
+      "args": ["-y", "curl-curl-cool-mcp"]
+    }
+  }
+}
+```
+
+### Add to Claude Code
+
+```bash
+claude mcp add httpclient -- npx -y curl-curl-cool-mcp
+```
+
+---
+
 ## Works with Postman
 
 > **This is where it gets interesting.** If you configure this server alongside [Postman's official MCP server](https://github.com/postmanlabs/postman-mcp-server), Claude becomes the orchestrator between them — browsing your Postman workspace with one server and executing requests with this one.
@@ -39,8 +81,8 @@ Add both servers to your Claude config (`~/Library/Application Support/Claude/cl
 {
   "mcpServers": {
     "httpclient": {
-      "command": "node",
-      "args": ["/absolute/path/to/mcp-httpclient/dist/index.js"]
+      "command": "npx",
+      "args": ["-y", "curl-curl-cool-mcp"]
     },
     "postman": {
       "command": "npx",
@@ -121,19 +163,6 @@ Unresolved placeholders are left intact so Claude can see what's missing rather 
 | `api-key` | `header` (default: `X-API-Key`), `value` | `<header>: <value>` |
 
 Explicit `headers` always take precedence over `auth`, so you can override if needed.
-
----
-
-## Installation
-
-```bash
-git clone https://github.com/dicoy/curl-curl-cool-mcp.git
-cd curl-curl-cool-mcp
-npm install
-npm run build
-```
-
-Then add the server to your Claude config as shown above, pointing `args` at `dist/index.js`.
 
 ---
 
